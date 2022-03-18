@@ -16,8 +16,9 @@ app.use(express.json())
 
 //Rollbar access token
 // include and initialize the rollbar library with your access token
-var Rollbar = require('rollbar')
-var rollbar = new Rollbar({
+
+const Rollbar = require('rollbar')
+const rollbar = new Rollbar({
   accessToken: '82e000013ed24b6eb0414879fd99f1b2',
   captureUncaught: true,
   captureUnhandledRejections: true,
@@ -26,15 +27,18 @@ var rollbar = new Rollbar({
 // record a generic message and send it to Rollbar
 rollbar.log('Hello world!')
 
+app.
 
 
+//File Requests 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/'))
 
-//Middleware 
+})
 
-app.use(express.static(path.join(__dirname, '../public')))
-app.use(express.static(path.join(__dirname, '../public/index.css')))
-app.use(express.static(path.join(__dirname, '../public/index.js')))
-
+app.get('/styles', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.css'))
+})
 
 
 app.get('/api/robots', (req, res) => {
