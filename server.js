@@ -1,25 +1,17 @@
-
-
-
-const exp = require('constants')
 const express = require('express')
 const path = require('path')
 const app = express()
 const {bots, playerRecord} = require('./data')
 const {shuffleArray} = require('./utils')
 
-const cors = require('cors')
-
-
-app.use(cors())
 app.use(express.json())
 
-//Rollbar access token
+//Rollbar
 // include and initialize the rollbar library with your access token
-
-const Rollbar = require('rollbar')
-const rollbar = new Rollbar({
-  accessToken: '82e000013ed24b6eb0414879fd99f1b2',
+let Rollbar = require('rollbar')
+const { errorMonitor } = require('events')
+let rollbar = new Rollbar({
+  accessToken: 'f6ce19640e9e4cf78c087f25ea239172',
   captureUncaught: true,
   captureUnhandledRejections: true,
 })
@@ -27,7 +19,11 @@ const rollbar = new Rollbar({
 // record a generic message and send it to Rollbar
 rollbar.log('Hello world!')
 
-app.
+
+//
+
+
+
 
 
 //File Requests 
@@ -40,10 +36,26 @@ app.get('/styles', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.css'))
 })
 
+app.get('/js', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.js'))
+})
+
+//MiddleWare: 
+//app.use('/, express.static(path.join(__dirname, '/public/index.html')))
+// app.use('/styles', express.static(path.join(__dirname, '/public/index.css')))
+
+
+
+
+
+
+
+
+
 
 app.get('/api/robots', (req, res) => {
     try {
-        rollbar.info('bot added')
+        rollbar.info('Hit all robots endpoint')
         res.status(200).send(botsArr)
     } catch (error) {
         console.log('ERROR GETTING BOTS', error)
@@ -53,10 +65,10 @@ app.get('/api/robots', (req, res) => {
 
 app.get('/api/robots/five', (req, res) => {
     try {
+        rollbar.info('somone got picked five robots')
         let shuffled = shuffleArray(bots)
         let choices = shuffled.slice(0, 5)
         let compDuo = shuffled.slice(6, 8)
-        rollbar.info('someone drew 5')
         res.status(200).send({choices, compDuo})
     } catch (error) {
         console.log('ERROR GETTING FIVE BOTS', error)
@@ -85,13 +97,14 @@ app.post('/api/duel', (req, res) => {
         if (compHealthAfterAttack > playerHealthAfterAttack) {
             playerRecord.losses++
             res.status(200).send('You lost!')
+            rollbar.info('someone lost')
         } else {
             playerRecord.losses++
             res.status(200).send('You won!')
         }
     } catch (error) {
-        
         console.log('ERROR DUELING', error)
+        rollbar.log('error with dueling')
         res.sendStatus(400)
     }
 })
@@ -101,11 +114,10 @@ app.get('/api/player', (req, res) => {
         res.status(200).send(playerRecord)
     } catch (error) {
         console.log('ERROR GETTING PLAYER STATS', error)
+        rollbar.error(error)
         res.sendStatus(400)
     }
 })
-
-app.use(rollbar.errorHandler())
 
 const port = process.env.PORT || 3000
 
